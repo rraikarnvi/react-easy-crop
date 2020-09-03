@@ -25,7 +25,7 @@ class App extends React.Component<{}, State> {
   state: State = {
     imageSrc,
     crop: { x: 0, y: 0 },
-    rotation: 0,
+    rotation: 90,
     flip: { horizontal: false, vertical: false },
     zoom: 1,
     aspect: 4 / 3,
@@ -78,6 +78,13 @@ class App extends React.Component<{}, State> {
             </label>
           </div>
           <div>
+            <button
+              onClick={() => {
+                console.log('click')
+              }}
+            >
+              Click
+            </button>
             <label>
               <input
                 type="checkbox"

@@ -80,57 +80,64 @@ export function computeCroppedArea(
 ): { croppedAreaPercentages: Area; croppedAreaPixels: Area } {
   // if the media is rotated by the user, we cannot limit the position anymore
   // as it might need to be negative.
+  const { width, height } = translateSize(mediaSize.width, mediaSize.height, rotation)
+
   const limitAreaFn = restrictPosition && rotation === 0 ? limitArea : noOp
+
   const croppedAreaPercentages = {
-    x: limitAreaFn(
-      100,
-      (((mediaSize.width - cropSize.width / zoom) / 2 - crop.x / zoom) / mediaSize.width) * 100
-    ),
-    y: limitAreaFn(
-      100,
-      (((mediaSize.height - cropSize.height / zoom) / 2 - crop.y / zoom) / mediaSize.height) * 100
-    ),
-    width: limitAreaFn(100, ((cropSize.width / mediaSize.width) * 100) / zoom),
-    height: limitAreaFn(100, ((cropSize.height / mediaSize.height) * 100) / zoom),
+    x: limitAreaFn(100, (((width - cropSize.width / zoom) / 2 - crop.x / zoom) / width) * 100),
+    y: limitAreaFn(100, (((height - cropSize.height / zoom) / 2 - crop.y / zoom) / height) * 100),
+    width: limitAreaFn(100, ((cropSize.width / width) * 100) / zoom),
+    height: limitAreaFn(100, ((cropSize.height / height) * 100) / zoom),
   }
 
   // we compute the pixels size naively
-  const widthInPixels = Math.round(
+  const widthInPixels =
+    // Math.round(
     limitAreaFn(
       mediaSize.naturalWidth,
       (croppedAreaPercentages.width * mediaSize.naturalWidth) / 100
     )
-  )
-  const heightInPixels = Math.round(
+  // )
+  const heightInPixels =
+    // Math.round(
     limitAreaFn(
       mediaSize.naturalHeight,
       (croppedAreaPercentages.height * mediaSize.naturalHeight) / 100
     )
-  )
+  // )
   const isImgWiderThanHigh = mediaSize.naturalWidth >= mediaSize.naturalHeight * aspect
 
   // then we ensure the width and height exactly match the aspect (to avoid rounding approximations)
-  // if the media is wider than high, when zoom is 0, the crop height will be equals to iamge height
+  // if the media is wider than high, when zoom is 0, the crop height will be equals to image height
   // thus we want to compute the width from the height and aspect for accuracy.
   // Otherwise, we compute the height from width and aspect.
   const sizePixels = isImgWiderThanHigh
     ? {
-        width: Math.round(heightInPixels * aspect),
+        width:
+          // Math.round(
+          heightInPixels * aspect,
+        // )
         height: heightInPixels,
       }
     : {
         width: widthInPixels,
-        height: Math.round(widthInPixels / aspect),
+        height:
+          // Math.round(
+          widthInPixels / aspect,
+        // )
       }
   const croppedAreaPixels = {
     ...sizePixels,
-    x: Math.round(
+    x: Math.max(
+      0,
       limitAreaFn(
         mediaSize.naturalWidth - sizePixels.width,
         (croppedAreaPercentages.x * mediaSize.naturalWidth) / 100
       )
     ),
-    y: Math.round(
+    y: Math.max(
+      0,
       limitAreaFn(
         mediaSize.naturalHeight - sizePixels.height,
         (croppedAreaPercentages.y * mediaSize.naturalHeight) / 100
